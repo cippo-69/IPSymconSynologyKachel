@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Neustart und Herunterfahren der NAS (mit Rückfrage).
  * USV-Alarm: Batteriebetrieb und kritischer Ladestand werden an eine Kachel-Visu gemeldet.
  */
-class SynologyKachel extends IPSModuleStrict
+class SynologyKachel extends IPSModule
 {
     private const IO_GUID = '{F308439D-89E4-5486-74B4-44D498C9CD07}';
     private const SYS_GUID = '{D04449C0-D59B-5C08-90C1-CB00EA0F92D1}';
@@ -23,7 +23,7 @@ class SynologyKachel extends IPSModuleStrict
     private const UPS_GUID = '{846DBFDC-7BAE-4F37-AA06-7647541B9B9A}';
     private const DATA_GUID = '{59B36CB0-EF4D-D794-FED4-89C69D410CDD}';
 
-    public function Create(): void
+    public function Create()
     {
         parent::Create();
 
@@ -50,7 +50,7 @@ class SynologyKachel extends IPSModuleStrict
         $this->SetVisualizationType(1);
     }
 
-    public function ApplyChanges(): void
+    public function ApplyChanges()
     {
         parent::ApplyChanges();
 
@@ -89,25 +89,25 @@ class SynologyKachel extends IPSModuleStrict
         $this->Push();
     }
 
-    public function MessageSink(int $TimeStamp, int $SenderID, int $Message, array $Data): void
+    public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
         $this->CheckAlarm();
         $this->Push();
     }
 
-    public function ReceiveData(string $JSONString): string
+    public function ReceiveData($JSONString)
     {
         return '';
     }
 
-    public function GetVisualizationTile(): string
+    public function GetVisualizationTile()
     {
         $accent = sprintf('#%06X', $this->ReadPropertyInteger('AccentColor') & 0xFFFFFF);
         $initial = '<script>handleMessage(' . json_encode(json_encode($this->BuildState())) . ');</script>';
         return file_get_contents(__DIR__ . '/module.html') . '<style>:root{--sy-accent:' . $accent . ';}</style>' . $initial;
     }
 
-    public function RequestAction(string $Ident, mixed $Value): void
+    public function RequestAction($Ident, $Value)
     {
         switch ($Ident) {
             case 'Refresh':

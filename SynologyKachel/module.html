@@ -149,6 +149,12 @@ function stTxt(st) {
   var m = { normal: 'normal', degraded: 'beeinträchtigt', crashed: 'abgestürzt', warning: 'Warnung', abnormal: 'auffällig', failing: 'fällt aus', not_use: 'nicht benutzt', initialized: 'bereit' };
   return m[String(st).toLowerCase()] || st || '–';
 }
+function raidTxt(r) {
+  var m = /^shr_with_(\d)_disks?_protect$/.exec(r);
+  if (m) return 'SHR · ' + m[1] + ' Laufwerk' + (m[1] === '1' ? '' : 'e') + ' Ausfallschutz';
+  if (r === 'shr_without_disk_protect') return 'SHR · ohne Ausfallschutz';
+  return r.toUpperCase().replace(/_/g, ' ');
+}
 function upsTxt(st) {
   st = String(st || '').toLowerCase();
   if (st.indexOf('lowbatt') >= 0) return 'Batterie schwach';
@@ -250,7 +256,7 @@ function render() {
       (s.storage || []).forEach(function (v) { if (/^VolumePercent/.test(v.ident)) h += '<div class="bars">' + bar(esc(v.name), v.value, esc(v.fmt), 80, 90) + '</div>'; });
     }
     h += '<div class="kv">';
-    if (x.pools && x.pools.length) x.pools.forEach(function (p) { h += '<span>Speicherpool ' + esc(p.name) + '</span><b>' + esc(stTxt(p.status)) + (p.raid ? ' · ' + esc(p.raid.toUpperCase().replace(/_/g, ' ')) : '') + (p.disks ? ' · ' + p.disks + ' Laufwerke' : '') + '</b>'; });
+    if (x.pools && x.pools.length) x.pools.forEach(function (p) { h += '<span>Speicherpool ' + esc(p.name) + '</span><b>' + esc(stTxt(p.status)) + (p.raid ? ' · ' + esc(raidTxt(p.raid)) : '') + (p.disks ? ' · ' + p.disks + ' Laufwerke' : '') + '</b>'; });
     else (s.storage || []).forEach(function (v) { if (!/^VolumePercent/.test(v.ident)) h += '<span>' + esc(v.name) + '</span><b>' + esc(stTxt(v.fmt)) + '</b>'; });
     h += '</div>';
     (x.disks || []).forEach(function (d) {
@@ -284,7 +290,9 @@ function render() {
       + '<span>Restlaufzeit</span><b>' + num(u.runtime, 0) + ' min</b>'
       + '<span>Verbindung NAS / USV</span><b>' + (u.nas ? 'online' : 'offline') + ' / ' + (u.ups ? 'online' : 'offline') + '</b>'
       + (x.ups && x.ups.model ? '<span>Gerät</span><b>' + esc(x.ups.model) + '</b>' : '')
-      + (x.ups && x.ups.delayType !== null && x.ups.delayType !== undefined ? '<span>DSM-Abschaltung</span><b>' + (x.ups.delayType === 1 ? 'bei Batterie schwach' : 'nach ' + num((x.ups.delay || 0) / 60, 0) + ' min Batteriebetrieb') + '</b>' : '')
+      + (x.ups && x.ups.mode ? '<span>Anschluss</span><b>' + esc(x.ups.mode) + '</b>' : '')
+      + (x.ups && x.ups.enabled === false ? '<span>DSM-USV-Unterstützung</span><b>aus</b>' : '')
+      + (x.ups && x.ups.enabled && x.ups.delay !== null && x.ups.delay !== undefined ? '<span>DSM-Abschaltung (Sicherheitsmodus)</span><b>' + (x.ups.delay < 0 ? 'bei Batterie schwach' : 'nach ' + x.ups.delay + ' min Batteriebetrieb') + '</b>' : '')
       + '<span>Alarm</span><b>unter ' + u.lowCharge + ' % oder ' + u.lowRuntime + ' min</b>'
       + '</div></div>';
   }

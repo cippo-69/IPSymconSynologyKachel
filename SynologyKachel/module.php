@@ -311,11 +311,10 @@ class SynologyKachel extends IPSModule
         $ux = $this->Api('SYNO.Core.ExternalDevice.UPS', 'get', '1');
         if (is_array($ux)) {
             $x['ups'] = [
-                'model'  => trim((string) ($ux['manufacture'] ?? '') . ' ' . (string) ($ux['model'] ?? '')),
-                'safeShutdown' => isset($ux['shutdown_device']) ? (bool) $ux['shutdown_device'] : null,
-                'mode'   => (string) ($ux['mode'] ?? ''),
-                'delay'  => isset($ux['delay_time']) ? (int) $ux['delay_time'] : null,
-                'delayType' => isset($ux['delay_time_type']) ? (int) $ux['delay_time_type'] : null
+                'model'   => trim(trim((string) ($ux['manufacture'] ?? '')) . ' ' . trim((string) ($ux['model'] ?? ''))),
+                'enabled' => isset($ux['enable']) ? (bool) $ux['enable'] : null,
+                'mode'    => (string) ($ux['mode'] ?? ''),
+                'delay'   => isset($ux['delay_time']) ? (int) $ux['delay_time'] : null   // -1 = bis Batterie schwach, sonst Minuten
             ];
         }
 

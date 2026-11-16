@@ -19,6 +19,10 @@
         ] }
     ],
     "actions": [
+        { "type": "RowLayout", "items": [
+            { "type": "PasswordTextBox", "name": "NewPassword", "caption": "Neues Passwort (leer = entfernen)" },
+            { "type": "Button", "caption": "Passwort setzen", "onClick": "if (SYK_SetActionPassword($id, $NewPassword)) { echo $NewPassword === '' ? 'Passwort entfernt: Neustart und Herunterfahren sind gesperrt.' : 'Passwort gesetzt.'; }" }
+        ] },
         { "type": "Button", "caption": "Zusatzdaten jetzt abfragen", "onClick": "echo SYK_UpdateExtra($id) ? 'OK' : 'keine Antwort';" }
     ],
     "status": [

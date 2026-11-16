@@ -86,6 +86,9 @@ button { font: inherit; color: var(--sy-fg); }
 .btn2 { min-height: 38px; border: 1px solid var(--sy-accent); background: none; border-radius: 999px; padding: 4px 14px; cursor: pointer; font-weight: 600; font-size: 13px; touch-action: manipulation; text-decoration: none; display: inline-flex; align-items: center; }
 #sy .btn2 { color: var(--sy-accent); }
 .btn2.solid { background: var(--sy-accent); }
+.pwrow { display: flex; gap: 8px; align-items: center; }
+.pwrow input { flex: 1; min-width: 0; font: inherit; font-size: 16px; min-height: 42px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--sy-line); background: var(--sy-bg2); color: var(--sy-fg); }
+.pwrow input:focus { outline: none; border-color: var(--sy-bad); }
 .acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .toast { font-size: 12px; padding: 8px 12px; border-radius: 10px; background: var(--sy-bg2); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .lnk { border: 0; background: none; cursor: pointer; font-size: 12px; padding: 4px; }
@@ -109,14 +112,18 @@ body.compact .card { padding: 8px 12px; gap: 6px; }
 <div id="sy"></div>
 <script>
 // confirm: '' | 'reboot' | 'shutdown'; open: aufgeklappte Abschnitte (bleiben beim Neuzeichnen offen)
-var SY = { s: null, confirm: '', confirmT: 0, arm: 0, offset: 0, open: {}, sent: {} };
+// busy: Passwortfeld hat den Fokus, dann nicht neu zeichnen (Eingabe ginge verloren)
+var SY = { s: null, confirm: '', confirmT: 0, arm: 0, offset: 0, open: {}, sent: {}, busy: false, pending: false };
 
 function handleMessage(data) {
   try { SY.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
   if (SY.s && SY.s.now) SY.offset = SY.s.now * 1000 - Date.now();
   SY.sent = {};
+  if (SY.busy) { SY.pending = true; return; }
   render();
 }
+function endConfirm() { SY.confirm = ''; SY.busy = false; SY.pending = false; clearTimeout(SY.confirmT); render(); }
+function armExpire() { clearTimeout(SY.confirmT); SY.confirmT = setTimeout(endConfirm, 60000); }
 function send(ident, value) { if (typeof requestAction === 'function') requestAction(ident, value); }
 function esc(t) { return String(t === null || t === undefined ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -171,13 +178,20 @@ function theme() {
   b.classList.toggle('dark', dark);
 }
 
-/* Bestätigung für Neustart/Herunterfahren: Knopf erst nach 3 s aktiv, Rückfrage verfällt nach 15 s */
+/* Neustart/Herunterfahren: nur mit Passwort. Bestätigen-Knopf erst nach 3 s aktiv, Rückfrage verfällt nach 60 s ohne Eingabe */
 function sysRow(key, title, info, warn, label) {
+  var s = SY.s, locked = s.pwLock && s.pwLock > now();
+  if (!s.pwSet) info = 'Gesperrt: kein Passwort eingerichtet (Instanz-Konfiguration).';
+  else if (locked) info = 'Nach Fehlversuchen gesperrt bis ' + at(s.pwLock) + '.';
   var h = '<div class="row"><div class="t"><b>' + title + '</b><span class="sub">' + (SY.confirm === key ? warn : info) + '</span></div>';
   if (SY.confirm === key) {
+    h += '<button class="btn plain" data-no="1">Abbrechen</button></div>';
     var wait = Math.max(0, 3 - Math.floor((Date.now() - SY.arm) / 1000));
-    h += '<div class="acts"><button class="btn plain" data-no="1">Abbrechen</button><button class="btn solid" data-yes="' + key + '" id="yes"' + (wait ? ' disabled' : '') + '>' + label + (wait ? ' (' + wait + ')' : '') + '</button></div>';
-  } else h += '<button class="btn" data-ask="' + key + '">' + label + '</button>';
+    h += '<div class="pwrow"><input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Passwort" aria-label="Passwort für ' + title + '">'
+      + '<button class="btn solid" data-yes="' + key + '" id="yes"' + (wait ? ' disabled' : '') + '>' + label + (wait ? ' (' + wait + ')' : '') + '</button></div>';
+    return h;
+  }
+  h += '<button class="btn" data-ask="' + key + '"' + (!s.pwSet || locked ? ' disabled' : '') + '>' + label + '</button>';
   return h + '</div>';
 }
 var SHUT_WARN = 'Auch IP-Symcon läuft auf dieser NAS und ist danach aus. Einschalten nur am Gerät (oder Wake-on-LAN).';
@@ -222,7 +236,7 @@ function render() {
 
   // Ergebnis der letzten Aktion (60 s)
   if (s.action && s.action.ts && now() - s.action.ts < 60) {
-    h += '<div class="toast"><span>' + esc(s.action.name) + ': ' + (s.action.ok ? 'ausgeführt' : 'fehlgeschlagen') + ' (' + at(s.action.ts) + ')</span><button class="lnk" data-dismiss="1">✕</button></div>';
+    h += '<div class="toast"><span>' + esc(s.action.name) + ': ' + (s.action.ok ? 'ausgeführt' : esc(s.action.msg || 'fehlgeschlagen')) + ' (' + at(s.action.ts) + ')</span><button class="lnk" data-dismiss="1">✕</button></div>';
   }
 
   // System
@@ -336,19 +350,32 @@ function bind() {
   document.querySelectorAll('[data-dismiss]').forEach(function (b) { b.onclick = function () { send('DismissAction', true); }; });
   document.querySelectorAll('[data-ask]').forEach(function (b) {
     b.onclick = function () {
+      if (b.disabled) return;
       SY.confirm = b.dataset.ask; SY.arm = Date.now(); render();
-      clearTimeout(SY.confirmT);
-      SY.confirmT = setTimeout(function () { SY.confirm = ''; render(); }, 15000);
+      armExpire();
+      var p = document.getElementById('pw'); if (p) p.focus();
     };
   });
-  document.querySelectorAll('[data-no]').forEach(function (b) { b.onclick = function () { SY.confirm = ''; clearTimeout(SY.confirmT); render(); }; });
+  document.querySelectorAll('[data-no]').forEach(function (b) { b.onclick = endConfirm; });
+  var pw = document.getElementById('pw');
+  if (pw) {
+    pw.addEventListener('focus', function () { SY.busy = true; });
+    pw.addEventListener('blur', function () { setTimeout(function () { if (document.activeElement && document.activeElement.id === 'pw') return; SY.busy = false; if (SY.pending && SY.confirm === '') { SY.pending = false; render(); } }, 200); });
+    pw.addEventListener('input', armExpire);
+    pw.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { var y = document.getElementById('yes'); if (y) y.click(); }
+      if (e.key === 'Escape') endConfirm();
+    });
+  }
   document.querySelectorAll('[data-yes]').forEach(function (b) {
     b.onclick = function () {
       if (b.disabled) return;
+      var p = document.getElementById('pw'), v = p ? p.value : '';
+      if (!v) { if (p) p.focus(); return; }
       var k = b.dataset.yes;
-      SY.confirm = ''; clearTimeout(SY.confirmT);
-      send(k === 'shutdown' ? 'Shutdown' : 'Reboot', k === 'shutdown' ? 'SHUTDOWN' : 'REBOOT');
-      render();
+      if (p) p.value = '';
+      send(k === 'shutdown' ? 'Shutdown' : 'Reboot', JSON.stringify({ pw: v }));
+      endConfirm();
     };
   });
 }

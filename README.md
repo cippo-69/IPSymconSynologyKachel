@@ -9,7 +9,12 @@ Kachel (HTML-SDK) für IP-Symcon 8 zu einer Synology-NAS. Sie baut auf dem Store
 - Surveillance Station: Home Mode schalten, Kamerastatus, Aufnahme je Kamera starten/stoppen
 - USV: Ladestand, Restlaufzeit, Verbindung, DSM-Abschaltregel
 - Pakete mit Status (aufklappbar)
-- Wartung: Aktualisieren, neu anmelden, Link zum DSM, Neustart und Herunterfahren (mit Rückfrage)
+- Wartung: Aktualisieren, neu anmelden, Link zum DSM, Neustart und Herunterfahren (nur mit Passwort)
+
+## Passwort für Neustart und Herunterfahren
+
+Neustart und Herunterfahren gehen nur nach Eingabe eines Passworts. Es wird in der Instanz-Konfiguration unter „Passwort setzen“ festgelegt;
+gespeichert wird nur der Hash. Ohne Passwort sind beide Funktionen gesperrt. Nach 5 Fehlversuchen ist die Eingabe 5 Minuten gesperrt.
 
 ## USV-Alarm
 

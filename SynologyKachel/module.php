@@ -44,6 +44,8 @@ class SynologyKachel extends IPSModule
         $this->RegisterAttributeString('Extra', '{}');
         $this->RegisterAttributeString('Action', '{}');      // letzte Aktion: name, ts, ok
         $this->RegisterAttributeString('Alarm', '{"level":0,"since":0}');
+        $this->RegisterAttributeString('PwHash', '');                 // Hash des Passworts für Neustart/Herunterfahren
+        $this->RegisterAttributeString('PwFail', '{"n":0,"until":0}');
 
         $this->RegisterTimer('ApiUpdate', 0, 'SYK_UpdateExtra($_IPS[\'TARGET\']);');
 
@@ -151,14 +153,14 @@ class SynologyKachel extends IPSModule
                 break;
             case 'Reboot':
                 $sys = $this->ReadPropertyInteger('SystemID');
-                if ($Value === 'REBOOT' && $this->ReadPropertyBoolean('AllowReboot') && $this->InstOk($sys, self::SYS_GUID)) {
+                if ($this->ReadPropertyBoolean('AllowReboot') && $this->InstOk($sys, self::SYS_GUID) && $this->CheckPassword('Neustart', $Value)) {
                     $this->LogMessage('Neustart der NAS über die Kachel angefordert', KL_WARNING);
                     $this->Act('Neustart', fn () => (bool) @SYNOSYS_Reboot($sys));
                 }
                 break;
             case 'Shutdown':
                 $sys = $this->ReadPropertyInteger('SystemID');
-                if ($Value === 'SHUTDOWN' && $this->ReadPropertyBoolean('AllowShutdown') && $this->InstOk($sys, self::SYS_GUID)) {
+                if ($this->ReadPropertyBoolean('AllowShutdown') && $this->InstOk($sys, self::SYS_GUID) && $this->CheckPassword('Herunterfahren', $Value)) {
                     $this->LogMessage('Herunterfahren der NAS über die Kachel angefordert', KL_WARNING);
                     $this->Notify('Synology wird heruntergefahren', 'Das Herunterfahren wurde über die Kachel ausgelöst.', 'Warning');
                     $this->Act('Herunterfahren', fn () => (bool) @SYNOSYS_Shutdown($sys));
@@ -171,6 +173,65 @@ class SynologyKachel extends IPSModule
                 throw new Exception('Unbekannte Aktion: ' . $Ident);
         }
         $this->Push();
+    }
+
+    /* ---------- Passwort für Neustart/Herunterfahren ---------- */
+
+    /** Setzt das Passwort (gespeichert wird nur der Hash). Leer = Passwort entfernen, dann sind Neustart und Herunterfahren gesperrt. */
+    public function SetActionPassword(string $Password): bool
+    {
+        if ($Password === '') {
+            $this->WriteAttributeString('PwHash', '');
+            $this->LogMessage('Passwort für Neustart/Herunterfahren entfernt', KL_NOTIFY);
+            $this->Push();
+            return true;
+        }
+        if (mb_strlen($Password) < 4) {
+            echo "Das Passwort muss mindestens 4 Zeichen haben.\n";
+            return false;
+        }
+        $this->WriteAttributeString('PwHash', password_hash($Password, PASSWORD_DEFAULT));
+        $this->WriteAttributeString('PwFail', '{"n":0,"until":0}');
+        $this->LogMessage('Passwort für Neustart/Herunterfahren gesetzt', KL_NOTIFY);
+        $this->Push();
+        return true;
+    }
+
+    public function GetConfigurationForm()
+    {
+        $f = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        $set = $this->ReadAttributeString('PwHash') !== '';
+        array_unshift($f['actions'], ['type' => 'Label', 'caption' => 'Passwort für Neustart und Herunterfahren: ' . ($set ? 'eingerichtet' : 'NICHT eingerichtet (beides gesperrt)')]);
+        return json_encode($f);
+    }
+
+    /** Prüft das Passwort aus der Kachel. Nach 5 Fehlversuchen 5 Minuten gesperrt. */
+    private function CheckPassword(string $what, $Value): bool
+    {
+        $p = json_decode((string) $Value, true);
+        $pw = is_array($p) ? (string) ($p['pw'] ?? '') : '';
+        $hash = $this->ReadAttributeString('PwHash');
+        $fail = json_decode($this->ReadAttributeString('PwFail'), true) ?: ['n' => 0, 'until' => 0];
+        $msg = '';
+        if ($hash === '') {
+            $msg = 'kein Passwort eingerichtet';
+        } elseif ((int) $fail['until'] > time()) {
+            $msg = 'gesperrt bis ' . date('H:i', (int) $fail['until']);
+        } elseif (!password_verify($pw, $hash)) {
+            $fail['n'] = (int) $fail['n'] + 1;
+            $msg = 'Passwort falsch';
+            if ($fail['n'] >= 5) {
+                $fail = ['n' => 0, 'until' => time() + 300];
+                $msg = 'Passwort 5-mal falsch, 5 Minuten gesperrt';
+            }
+            $this->WriteAttributeString('PwFail', json_encode($fail));
+            $this->LogMessage($what . ' der NAS: falsches Passwort in der Kachel', KL_WARNING);
+        } else {
+            $this->WriteAttributeString('PwFail', '{"n":0,"until":0}');
+            return true;
+        }
+        $this->WriteAttributeString('Action', json_encode(['name' => $what, 'ts' => time(), 'ok' => false, 'msg' => $msg]));
+        return false;
     }
 
     /** Rohabfrage der DSM-API über die IO (zum Testen): z. B. SYK_ApiRaw($id, 'SYNO.Core.System', 'info', '1,2,3', ''). */
@@ -505,6 +566,8 @@ class SynologyKachel extends IPSModule
             'dsm'     => $this->DsmUrl(),
             'canReboot'   => $this->ReadPropertyBoolean('AllowReboot'),
             'canShutdown' => $this->ReadPropertyBoolean('AllowShutdown'),
+            'pwSet'   => $this->ReadAttributeString('PwHash') !== '',
+            'pwLock'  => (int) (json_decode($this->ReadAttributeString('PwFail'), true)['until'] ?? 0),
             'action'  => json_decode($this->ReadAttributeString('Action'), true) ?: null,
             'x'       => json_decode($this->ReadAttributeString('Extra'), true) ?: null,
             'sys'     => [

@@ -1,0 +1,29 @@
+{
+    "elements": [
+        { "type": "Label", "caption": "Die Kachel hängt an der Synology IO und liest dort zusätzlich Modell, Datenträger, Kameras, Home Mode und Pakete." },
+        { "type": "SelectInstance", "name": "SystemID", "caption": "Synology System", "validModules": ["{D04449C0-D59B-5C08-90C1-CB00EA0F92D1}"], "width": "600px" },
+        { "type": "SelectInstance", "name": "StorageID", "caption": "Synology Storage (optional)", "validModules": ["{E94AC765-F5C1-0E77-7870-83F9D7EBFD6F}"], "width": "600px" },
+        { "type": "SelectInstance", "name": "SurveillanceID", "caption": "Synology Surveillance Station (optional)", "validModules": ["{63071943-5B26-AB52-4311-9ADC12E53F3D}"], "width": "600px" },
+        { "type": "SelectInstance", "name": "UpsID", "caption": "Synology UPS (optional)", "validModules": ["{846DBFDC-7BAE-4F37-AA06-7647541B9B9A}"], "width": "600px" },
+        { "type": "NumberSpinner", "name": "ApiInterval", "caption": "Zusatzdaten abfragen alle", "suffix": " s", "minimum": 30, "maximum": 3600 },
+        { "type": "SelectColor", "name": "AccentColor", "caption": "Akzentfarbe" },
+        { "type": "ValidationTextBox", "name": "DsmUrl", "caption": "Link zum DSM (leer = keiner)", "width": "400px" },
+        { "type": "ExpansionPanel", "caption": "Systemfunktionen und USV-Alarm", "items": [
+            { "type": "CheckBox", "name": "AllowReboot", "caption": "Neustart in der Kachel anbieten" },
+            { "type": "CheckBox", "name": "AllowShutdown", "caption": "Herunterfahren in der Kachel anbieten" },
+            { "type": "SelectInstance", "name": "NotifyVisuID", "caption": "Alarm an Kachel-Visualisierung (0 = kein Alarm)", "validModules": ["{B5B875BB-9B76-45FD-4E67-2607E45B3AC4}"], "width": "400px" },
+            { "type": "RowLayout", "items": [
+                { "type": "NumberSpinner", "name": "LowCharge", "caption": "USV kritisch unter", "suffix": " %", "minimum": 5, "maximum": 95 },
+                { "type": "NumberSpinner", "name": "LowRuntime", "caption": "oder Restlaufzeit unter", "suffix": " min", "minimum": 1, "maximum": 120 }
+            ] }
+        ] }
+    ],
+    "actions": [
+        { "type": "Button", "caption": "Zusatzdaten jetzt abfragen", "onClick": "echo SYK_UpdateExtra($id) ? 'OK' : 'keine Antwort';" }
+    ],
+    "status": [
+        { "code": 102, "icon": "active", "caption": "Aktiv" },
+        { "code": 201, "icon": "error", "caption": "Keine Synology-System-Instanz ausgewählt" },
+        { "code": 202, "icon": "error", "caption": "Nicht mit der Synology IO verbunden" }
+    ]
+}

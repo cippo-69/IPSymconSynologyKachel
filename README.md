@@ -1,0 +1,30 @@
+# Synology Kachel
+
+Kachel (HTML-SDK) für IP-Symcon 8 zu einer Synology-NAS. Sie baut auf dem Store-Modul **Synology** (timo-u) auf.
+
+## Inhalt
+
+- Status, Modell, DSM-Version, CPU, Arbeitsspeicher, Temperatur, Netzwerk, Laufzeit, DSM-Update, Systemabsturz
+- Speicher: Volumes mit Belegung, Speicherpools, Datenträger mit Temperatur und SMART-Status
+- Surveillance Station: Home Mode schalten, Kamerastatus, Aufnahme je Kamera starten/stoppen
+- USV: Ladestand, Restlaufzeit, Verbindung, DSM-Abschaltregel
+- Pakete mit Status (aufklappbar)
+- Wartung: Aktualisieren, neu anmelden, Link zum DSM, Neustart und Herunterfahren (mit Rückfrage)
+
+## USV-Alarm
+
+Geht die USV in den Batteriebetrieb, meldet die Kachel einen Stromausfall an die eingestellte Kachel-Visualisierung.
+Unterschreiten Ladestand oder Restlaufzeit die Schwellen (oder meldet die USV „Batterie schwach“), folgt ein Alarm.
+Die Kachel zeigt dann oben einen Alarmbereich mit der Option, die NAS herunterzufahren. Ist der Strom zurück, kommt eine Info.
+
+## Einrichtung
+
+1. Modul über die Modulverwaltung hinzufügen: `https://github.com/cippo-69/IPSymconSynologyKachel`
+2. Instanz „Synology Kachel“ anlegen und mit der vorhandenen **Synology IO** verbinden.
+3. Instanzen System, Storage, Surveillance Station und UPS auswählen.
+
+Die Kachel braucht keine eigenen Zugangsdaten: Zusatzdaten fragt sie über die Synology IO ab.
+
+## Lizenz
+
+MIT

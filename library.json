@@ -1,0 +1,12 @@
+{
+    "id": "{9804BC6D-45CA-443E-805A-AA35B416DF2C}",
+    "author": "cippo-69",
+    "name": "Synology Kachel",
+    "url": "https://github.com/cippo-69/IPSymconSynologyKachel",
+    "compatibility": {
+        "version": "8.0"
+    },
+    "version": "0.1",
+    "build": 1,
+    "date": 0
+}

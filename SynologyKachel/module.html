@@ -1,10 +1,11 @@
 <style>
 :root {
-  --sy-accent: #5ECAAB;
-  --sy-ok: #3DBE7A;
-  --sy-warn: #E8A33D;
-  --sy-bad: #E5534B;
-  --sy-fg: #1F2124;
+  --sy-accent: #2F6B4F;   /* Tannengrün (Farbkonzept W5x) */
+  --sy-ok: #2F6B4F;      /* Farbkonzept W5x: Tannengrün */
+  --sy-warn: #9A5200;    /* Harz */
+  --sy-bad: #C8321F;     /* Signalrot */
+  --sy-on: #fff;         /* Schrift auf Akzent-/Alarmfläche */
+  --sy-fg: #1E2224;      /* Anthrazit */
   --sy-bg: rgba(0,0,0,.045);
   --sy-bg2: rgba(0,0,0,.075);
   --sy-line: rgba(0,0,0,.12);
@@ -12,7 +13,12 @@
   --sy-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
 }
 body.dark {
-  --sy-fg: #F2F3F5;
+  --sy-accent: #74B892;
+  --sy-ok: #74B892;
+  --sy-warn: #EE9A45;
+  --sy-bad: #FF5A47;
+  --sy-on: #1E2224;
+  --sy-fg: #F1F0EB;
   --sy-bg: rgba(255,255,255,.10);
   --sy-bg2: rgba(255,255,255,.15);
   --sy-line: rgba(255,255,255,.16);
@@ -24,8 +30,8 @@ body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI'
 button { font: inherit; color: var(--sy-fg); }
 #sy, #sy div, #sy span, #sy b, #sy summary { color: var(--sy-fg); }
 #sy .lbl, #sy .sub, #sy .facts, #sy .facts span, #sy .kv span, #sy .hint, #sy .meta { color: var(--sy-muted); }
-#sy .badge, #sy .btn.solid, #sy .btn2.solid { color: #fff; }
-#sy .badge.warn { color: #3a2500; }
+#sy .badge, #sy .btn.solid, #sy .btn2.solid { color: var(--sy-on); }
+#sy .badge.warn { color: var(--sy-on); }
 #sy { position: absolute; inset: 0; padding: var(--sy-top) 16px 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
 
@@ -33,8 +39,8 @@ button { font: inherit; color: var(--sy-fg); }
 .st { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .st .v { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: 500; line-height: 1.1; }
 .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--sy-muted); }
-.dot.ok { background: var(--sy-ok); box-shadow: 0 0 0 4px rgba(61,190,122,.22); }
-.dot.bad { background: var(--sy-bad); box-shadow: 0 0 0 4px rgba(229,83,75,.22); }
+.dot.ok { background: var(--sy-ok); box-shadow: 0 0 0 4px rgba(116,184,146,.25); }
+.dot.bad { background: var(--sy-bad); box-shadow: 0 0 0 4px rgba(255,90,71,.25); }
 .dot.warn { background: var(--sy-warn); }
 .dot.busy { background: var(--sy-warn); animation: pulse 1.2s infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
@@ -46,8 +52,8 @@ button { font: inherit; color: var(--sy-fg); }
 .badge.warn { background: var(--sy-warn); }
 
 .card { background: var(--sy-bg); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.card.alarm { background: rgba(229,83,75,.16); border: 1px solid var(--sy-bad); }
-.card.alarm.l1 { background: rgba(232,163,61,.16); border-color: var(--sy-warn); }
+.card.alarm { background: rgba(255,90,71,.16); border: 1px solid var(--sy-bad); }
+.card.alarm.l1 { background: rgba(238,154,69,.16); border-color: var(--sy-warn); }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
 .row .t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .row .t b { font-weight: 500; }
@@ -79,7 +85,7 @@ button { font: inherit; color: var(--sy-fg); }
 .btn { min-height: 40px; border: 1px solid var(--sy-bad); background: none; border-radius: 999px; padding: 6px 16px; cursor: pointer; font-weight: 600; font-size: 13px; touch-action: manipulation; flex: none; }
 #sy .btn { color: var(--sy-bad); }
 .btn.solid { background: var(--sy-bad); }
-#sy .btn.solid { color: #fff; }
+#sy .btn.solid { color: var(--sy-on); }
 .btn.plain { border-color: var(--sy-line); }
 #sy .btn.plain { color: var(--sy-fg); }
 .btn:disabled { opacity: .45; cursor: default; }

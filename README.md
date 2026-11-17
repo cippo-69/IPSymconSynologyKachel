@@ -30,6 +30,10 @@ Die Kachel zeigt dann oben einen Alarmbereich mit der Option, die NAS herunterzu
 
 Die Kachel braucht keine eigenen Zugangsdaten: Zusatzdaten fragt sie über die Synology IO ab.
 
+## Farben
+
+Die Kachel hat keine eigenen Farbeinstellungen. Die Farben kommen aus dem Modul [Visu Design](https://github.com/cippo-69/IPSymconVisuDesign) (CSS-Variablen `--w5-*`, heller Modus und Dark Mode). Ohne Design-Instanz gilt das Farbkonzept W5x.
+
 ## Lizenz
 
 MIT

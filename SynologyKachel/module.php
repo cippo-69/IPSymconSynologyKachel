@@ -32,7 +32,6 @@ class SynologyKachel extends IPSModule
         $this->RegisterPropertyInteger('SurveillanceID', 0);
         $this->RegisterPropertyInteger('UpsID', 0);
         $this->RegisterPropertyInteger('ApiInterval', 60);
-        $this->RegisterPropertyInteger('AccentColor', 0x5ECAAB);
         $this->RegisterPropertyString('DsmUrl', '');
         $this->RegisterPropertyBoolean('AllowReboot', true);
         $this->RegisterPropertyBoolean('AllowShutdown', true);
@@ -102,11 +101,25 @@ class SynologyKachel extends IPSModule
         return '';
     }
 
+    /** Farben aus dem Modul „Visu Design“ (W5D); ohne Instanz gelten die Vorgaben im module.html. */
+    private function DesignStyle(): string
+    {
+        $guid = '{018EEC85-8FFC-4E1F-A966-702C4BBDC2E8}';
+        if (!IPS_ModuleExists($guid) || !function_exists('W5D_GetCSS')) {
+            return '';
+        }
+        $ids = IPS_GetInstanceListByModuleID($guid);
+        if (count($ids) === 0) {
+            return '';
+        }
+        sort($ids);
+        return '<style>' . W5D_GetCSS($ids[0]) . '</style>';
+    }
+
     public function GetVisualizationTile()
     {
-        $accent = sprintf('#%06X', $this->ReadPropertyInteger('AccentColor') & 0xFFFFFF);
         $initial = '<script>handleMessage(' . json_encode(json_encode($this->BuildState())) . ');</script>';
-        return file_get_contents(__DIR__ . '/module.html') . '<style>:root{--sy-accent:' . $accent . ';}</style>' . $initial;
+        return $this->DesignStyle() . file_get_contents(__DIR__ . '/module.html') . $initial;
     }
 
     public function RequestAction($Ident, $Value)

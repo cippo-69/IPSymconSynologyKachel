@@ -1,24 +1,27 @@
 <style>
 :root {
-  --sy-accent: #2F6B4F;   /* Tannengrün (Farbkonzept W5x) */
-  --sy-ok: #2F6B4F;      /* Farbkonzept W5x: Tannengrün */
-  --sy-warn: #9A5200;    /* Harz */
-  --sy-bad: #C8321F;     /* Signalrot */
-  --sy-on: #fff;         /* Schrift auf Akzent-/Alarmfläche */
-  --sy-fg: #1E2224;      /* Anthrazit */
   --sy-bg: rgba(0,0,0,.045);
   --sy-bg2: rgba(0,0,0,.075);
   --sy-line: rgba(0,0,0,.12);
   --sy-muted: rgba(0,0,0,.52);
   --sy-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
 }
+/* Farben aus dem Modul „Visu Design“ (--w5-*); die Werte nach dem Komma gelten ohne Design-Instanz */
+body {
+  --sy-accent: var(--w5-accent, #2F6B4F);
+  --sy-ok: var(--w5-accent, #2F6B4F);
+  --sy-warn: var(--w5-warn, #9A5200);
+  --sy-bad: var(--w5-alarm, #C8321F);
+  --sy-on: var(--w5-on, #fff);
+  --sy-fg: var(--w5-fg, #1E2224);
+}
 body.dark {
-  --sy-accent: #74B892;
-  --sy-ok: #74B892;
-  --sy-warn: #EE9A45;
-  --sy-bad: #FF5A47;
-  --sy-on: #1E2224;
-  --sy-fg: #F1F0EB;
+  --sy-accent: var(--w5-accent, #74B892);
+  --sy-ok: var(--w5-accent, #74B892);
+  --sy-warn: var(--w5-warn, #EE9A45);
+  --sy-bad: var(--w5-alarm, #FF5A47);
+  --sy-on: var(--w5-on, #1E2224);
+  --sy-fg: var(--w5-fg, #F1F0EB);
   --sy-bg: rgba(255,255,255,.10);
   --sy-bg2: rgba(255,255,255,.15);
   --sy-line: rgba(255,255,255,.16);

@@ -124,8 +124,17 @@ body.compact .card { padding: 8px 12px; gap: 6px; }
 // busy: Passwortfeld hat den Fokus, dann nicht neu zeichnen (Eingabe ginge verloren)
 var SY = { s: null, confirm: '', confirmT: 0, arm: 0, offset: 0, open: {}, sent: {}, busy: false, pending: false };
 
+/* Farben aus „Visu Design“ live übernehmen (Element #w5d), auch wenn die Visu die Kachel zwischengespeichert hat */
+function design(css) {
+  if (typeof css !== 'string') return;
+  var st = document.getElementById('w5d');
+  if (!st) { st = document.createElement('style'); st.id = 'w5d'; (document.head || document.body).appendChild(st); }
+  if (st.textContent !== css) st.textContent = css;
+}
+
 function handleMessage(data) {
   try { SY.s = typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return; }
+  design(SY.s.design);
   if (SY.s && SY.s.now) SY.offset = SY.s.now * 1000 - Date.now();
   SY.sent = {};
   if (SY.busy) { SY.pending = true; return; }

@@ -1,124 +1,5 @@
-<style>
-:root {
-  --sy-bg: rgba(0,0,0,.045);
-  --sy-bg2: rgba(0,0,0,.075);
-  --sy-line: rgba(0,0,0,.12);
-  --sy-muted: rgba(0,0,0,.52);
-  --sy-top: 58px;          /* Platz für Titel und Vergrößern-Symbol der Symcon-Kachel */
-}
-/* Farben aus dem Modul „Visu Design“ (--w5-*); die Werte nach dem Komma gelten ohne Design-Instanz */
-body {
-  --sy-accent: var(--w5-accent, #2F6B4F);
-  --sy-ok: var(--w5-accent, #2F6B4F);
-  --sy-warn: var(--w5-warn, #9A5200);
-  --sy-bad: var(--w5-alarm, #C8321F);
-  --sy-on: var(--w5-on, #fff);
-  --sy-fg: var(--w5-fg, #1E2224);
-}
-body.dark {
-  --sy-accent: var(--w5-accent, #74B892);
-  --sy-ok: var(--w5-accent, #74B892);
-  --sy-warn: var(--w5-warn, #EE9A45);
-  --sy-bad: var(--w5-alarm, #FF5A47);
-  --sy-on: var(--w5-on, #1E2224);
-  --sy-fg: var(--w5-fg, #F1F0EB);
-  --sy-bg: rgba(255,255,255,.10);
-  --sy-bg2: rgba(255,255,255,.15);
-  --sy-line: rgba(255,255,255,.16);
-  --sy-muted: rgba(255,255,255,.6);
-}
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: transparent; }
-body { font-family: 'Poppins', 'Work Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 14px; line-height: 1.35; }
-button { font: inherit; color: var(--sy-fg); }
-#sy, #sy div, #sy span, #sy b, #sy summary { color: var(--sy-fg); }
-#sy .lbl, #sy .sub, #sy .facts, #sy .facts span, #sy .kv span, #sy .hint, #sy .meta { color: var(--sy-muted); }
-#sy .badge, #sy .btn.solid, #sy .btn2.solid { color: var(--sy-on); }
-#sy .badge.warn { color: var(--sy-on); }
-#sy { position: absolute; inset: 0; padding: var(--sy-top) 16px 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.lbl { font-size: 11px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
-
-.head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.st { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.st .v { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: 500; line-height: 1.1; }
-.dot { width: 12px; height: 12px; border-radius: 50%; flex: none; background: var(--sy-muted); }
-.dot.ok { background: var(--sy-ok); box-shadow: 0 0 0 4px rgba(116,184,146,.25); }
-.dot.bad { background: var(--sy-bad); box-shadow: 0 0 0 4px rgba(255,90,71,.25); }
-.dot.warn { background: var(--sy-warn); }
-.dot.busy { background: var(--sy-warn); animation: pulse 1.2s infinite; }
-@keyframes pulse { 50% { opacity: .35; } }
-.sub { font-size: 12px; }
-.facts { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; text-align: right; flex: none; }
-.facts b { font-weight: 600; }
-.badges { display: flex; flex-wrap: wrap; gap: 6px; }
-.badge { font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 3px 9px; border-radius: 999px; background: var(--sy-bad); }
-.badge.warn { background: var(--sy-warn); }
-
-.card { background: var(--sy-bg); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
-.card.alarm { background: rgba(255,90,71,.16); border: 1px solid var(--sy-bad); }
-.card.alarm.l1 { background: rgba(238,154,69,.16); border-color: var(--sy-warn); }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; }
-.row .t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.row .t b { font-weight: 500; }
-.card .row + .row { border-top: 1px solid var(--sy-line); padding-top: 10px; }
-
-.tg { position: relative; width: 56px; height: 32px; border-radius: 16px; background: var(--sy-line); border: 0; cursor: pointer; padding: 0; flex: none; touch-action: manipulation; }
-.tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
-.tg.on { background: var(--sy-accent); }
-.tg.on::after { left: 27px; }
-.tg.rec.on { background: var(--sy-bad); }
-.tg:disabled { opacity: .45; cursor: default; }
-
-/* Balken */
-.bar { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: 12px; }
-.bar .tr { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--sy-line); overflow: hidden; }
-.bar .tr i { display: block; height: 100%; background: var(--sy-accent); }
-.bar .tr i.warn { background: var(--sy-warn); }
-.bar .tr i.bad { background: var(--sy-bad); }
-.bar b { font-weight: 500; font-variant-numeric: tabular-nums; }
-.bars { display: flex; flex-direction: column; gap: 10px; }
-
-.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12px; }
-.kv b { font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.hint { font-size: 12px; }
-.chip { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; padding: 5px 12px; border-radius: 999px; background: var(--sy-bg2); flex: none; white-space: nowrap; }
-.chip .dot { width: 9px; height: 9px; }
-.meta { font-size: 11px; }
-
-.btn { min-height: 40px; border: 1px solid var(--sy-bad); background: none; border-radius: 999px; padding: 6px 16px; cursor: pointer; font-weight: 600; font-size: 13px; touch-action: manipulation; flex: none; }
-#sy .btn { color: var(--sy-bad); }
-.btn.solid { background: var(--sy-bad); }
-#sy .btn.solid { color: var(--sy-on); }
-.btn.plain { border-color: var(--sy-line); }
-#sy .btn.plain { color: var(--sy-fg); }
-.btn:disabled { opacity: .45; cursor: default; }
-.btn2 { min-height: 38px; border: 1px solid var(--sy-accent); background: none; border-radius: 999px; padding: 4px 14px; cursor: pointer; font-weight: 600; font-size: 13px; touch-action: manipulation; text-decoration: none; display: inline-flex; align-items: center; }
-#sy .btn2 { color: var(--sy-accent); }
-.btn2.solid { background: var(--sy-accent); }
-.pwrow { display: flex; gap: 8px; align-items: center; }
-.pwrow input { flex: 1; min-width: 0; font: inherit; font-size: 16px; min-height: 42px; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--sy-line); background: var(--sy-bg2); color: var(--sy-fg); }
-.pwrow input:focus { outline: none; border-color: var(--sy-bad); }
-.acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-.toast { font-size: 12px; padding: 8px 12px; border-radius: 10px; background: var(--sy-bg2); display: flex; justify-content: space-between; gap: 8px; align-items: center; }
-.lnk { border: 0; background: none; cursor: pointer; font-size: 12px; padding: 4px; }
-#sy .lnk { color: var(--sy-muted); }
-details summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-details summary::-webkit-details-marker { display: none; }
-details summary::after { content: "▾"; font-size: 12px; }
-details[open] summary::after { content: "▴"; }
-details .kv { margin-top: 10px; }
-
-@media (max-width: 420px) {
-  #sy { padding-left: 12px; padding-right: 12px; }
-  .st .v { font-size: 22px; }
-  .card { padding: 12px; }
-}
-body.compact #sy { gap: 8px; padding-bottom: 8px; }
-body.compact .more { display: none; }
-body.compact .st .v { font-size: 20px; }
-body.compact .card { padding: 8px 12px; gap: 6px; }
-</style>
-<div id="sy"></div>
+<!-- Layout und Farben kommen vollständig aus „Visu Design“ (W5D_GetCSS + W5D_GetTileCSS, Bausteine laut README); hier kein eigenes CSS -->
+<div id="sy" class="w5t fill"></div>
 <script>
 // confirm: '' | 'reboot' | 'shutdown'; open: aufgeklappte Abschnitte (bleiben beim Neuzeichnen offen)
 // busy: Passwortfeld hat den Fokus, dann nicht neu zeichnen (Eingabe ginge verloren)
@@ -189,12 +70,9 @@ function upsTxt(st) {
   return st.replace(/^usb_ups_status_/, '') || '–';
 }
 
-function theme() {
-  var b = document.body, m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(getComputedStyle(b).color || ''), dark;
-  if (m) dark = (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 > 0.5;
-  else dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  b.classList.toggle('dark', dark);
-}
+/* Hell/Dunkel übernimmt W5D_GetTileJS (w5tTheme); ohne Design-Modul bleibt der helle Modus */
+function theme() { if (typeof w5tTheme === 'function') w5tTheme(); }
+
 
 /* Neustart/Herunterfahren: nur mit Passwort. Bestätigen-Knopf erst nach 3 s aktiv, Rückfrage verfällt nach 60 s ohne Eingabe */
 function sysRow(key, title, info, warn, label) {
@@ -203,13 +81,13 @@ function sysRow(key, title, info, warn, label) {
   else if (locked) info = 'Nach Fehlversuchen gesperrt bis ' + at(s.pwLock) + '.';
   var h = '<div class="row"><div class="t"><b>' + title + '</b><span class="sub">' + (SY.confirm === key ? warn : info) + '</span></div>';
   if (SY.confirm === key) {
-    h += '<button class="btn plain" data-no="1">Abbrechen</button></div>';
+    h += '<button class="btn" data-no="1">Abbrechen</button></div>';
     var wait = Math.max(0, 3 - Math.floor((Date.now() - SY.arm) / 1000));
-    h += '<div class="pwrow"><input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Passwort" aria-label="Passwort für ' + title + '">'
-      + '<button class="btn solid" data-yes="' + key + '" id="yes"' + (wait ? ' disabled' : '') + '>' + label + (wait ? ' (' + wait + ')' : '') + '</button></div>';
+    h += '<div class="inrow"><input id="pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Passwort" aria-label="Passwort für ' + title + '">'
+      + '<button class="btn bad solid" data-yes="' + key + '" id="yes"' + (wait ? ' disabled' : '') + '>' + label + (wait ? ' (' + wait + ')' : '') + '</button></div>';
     return h;
   }
-  h += '<button class="btn" data-ask="' + key + '"' + (!s.pwSet || locked ? ' disabled' : '') + '>' + label + '</button>';
+  h += '<button class="btn bad" data-ask="' + key + '"' + (!s.pwSet || locked ? ' disabled' : '') + '>' + label + '</button>';
   return h + '</div>';
 }
 var SHUT_WARN = 'Auch IP-Symcon läuft auf dieser NAS und ist danach aus. Einschalten nur am Gerät (oder Wake-on-LAN).';
@@ -245,7 +123,7 @@ function render() {
 
   // USV-Alarm mit Herunterfahren
   if (u && u.level > 0) {
-    h += '<div class="card alarm' + (u.level === 1 ? ' l1' : '') + '"><div class="row"><div class="t"><span class="lbl">' + (u.level === 2 ? 'USV kritisch' : 'Stromausfall') + '</span>'
+    h += '<div class="card ' + (u.level === 1 ? 'warn' : 'alarm') + '"><div class="row"><div class="t"><span class="lbl">' + (u.level === 2 ? 'USV kritisch' : 'Stromausfall') + '</span>'
       + '<b>' + upsTxt(u.state) + ' seit ' + at(u.alarmSince) + '</b></div><span class="chip"><span class="dot ' + (u.level === 2 ? 'bad' : 'busy') + '"></span>' + num(u.charge, 0) + ' % · ' + num(u.runtime, 0) + ' min</span></div>'
       + '<div class="hint">' + (u.level === 2 ? 'Ladestand unter ' + u.lowCharge + ' % oder Restlaufzeit unter ' + u.lowRuntime + ' min. NAS jetzt geordnet herunterfahren.' : 'Die NAS läuft über die USV. Bei weiter sinkendem Ladestand herunterfahren.') + '</div>';
     if (s.canShutdown) h += sysRow('shutdown', 'NAS herunterfahren', 'Fährt DSM geordnet herunter.', SHUT_WARN, 'Herunterfahren');
@@ -294,7 +172,7 @@ function render() {
     (x.disks || []).forEach(function (d) {
       var ok = good(d.status) && good(d.smart);
       h += '<div class="row"><div class="t"><b>' + esc(d.name) + '</b><span class="sub">' + esc([d.model, d.type, d.size ? bytes(d.size) : ''].filter(Boolean).join(' · ')) + (d.fw ? ' · FW ' + esc(d.fw) : '') + '</span></div>'
-        + '<span class="chip"><span class="dot ' + (ok ? 'ok' : 'bad') + '"></span>' + num(d.temp, 0) + ' °C · ' + esc(ok ? 'gesund' : stTxt(!good(d.status) ? d.status : d.smart)) + '</span></div>';
+        + '<span class="chip"><span class="dot sm ' + (ok ? 'ok' : 'bad') + '"></span>' + num(d.temp, 0) + ' °C · ' + esc(ok ? 'gesund' : stTxt(!good(d.status) ? d.status : d.smart)) + '</span></div>';
     });
     h += '</div>';
   }
@@ -309,9 +187,9 @@ function render() {
       var xc = (x.cams || {})[String(c.id)] || {}, key = 'cam' + c.id;
       var rec = SY.sent[key] !== undefined ? SY.sent[key] : (xc.rec !== null && xc.rec !== undefined ? xc.rec > 0 : null);
       var ok = c.state === 1, off = c.state === 7;
-      h += '<div class="row"><div class="t"><b>' + esc(c.name) + '</b><span class="sub"><span class="dot ' + (ok ? 'ok' : off ? '' : 'bad') + '" style="display:inline-block;width:8px;height:8px;margin-right:6px"></span>' + esc(c.fmt)
+      h += '<div class="row"><div class="t"><b>' + esc(c.name) + '</b><span class="sub"><span class="dot sm ' + (ok ? 'ok' : off ? '' : 'bad') + '"></span>' + esc(c.fmt)
         + (xc.model ? ' · ' + esc(xc.model) : '') + (xc.ip ? ' · ' + esc(xc.ip) : '') + ' · ' + (rec === null ? 'Aufnahme ?' : rec ? 'nimmt auf' : 'keine Aufnahme') + '</span></div>'
-        + '<button class="tg rec' + (rec ? ' on' : '') + '" data-cam="' + c.id + '" data-rec="' + (rec ? 1 : 0) + '" aria-label="Aufnahme ' + esc(c.name) + '"' + (ok && on ? '' : ' disabled') + '></button></div>';
+        + '<button class="tg bad' + (rec ? ' on' : '') + '" data-cam="' + c.id + '" data-rec="' + (rec ? 1 : 0) + '" aria-label="Aufnahme ' + esc(c.name) + '"' + (ok && on ? '' : ' disabled') + '></button></div>';
     });
     h += '</div>';
   }
@@ -340,9 +218,9 @@ function render() {
   // Wartung
   h += '<div class="card more"><span class="lbl">Wartung</span>'
     + '<div class="row"><div class="t"><b>Daten</b><span class="sub">' + (x.ts ? (x.ok === false ? 'DSM antwortet nicht, zuletzt ' + at(x.lastOk) : 'abgefragt ' + at(x.ts)) : 'noch nicht abgefragt') + '</span></div>'
-    + '<div class="acts"><button class="btn2" data-act="Refresh">Aktualisieren</button>' + (s.dsm ? '<a class="btn2" href="' + esc(s.dsm) + '" target="_blank" rel="noopener">DSM</a>' : '') + '</div></div>'
+    + '<div class="acts"><button class="btn acc" data-act="Refresh">Aktualisieren</button>' + (s.dsm ? '<a class="btn acc" href="' + esc(s.dsm) + '" target="_blank" rel="noopener">DSM</a>' : '') + '</div></div>'
     + '<div class="row"><div class="t"><b>Anmeldung</b><span class="sub">Synology IO: ' + (s.io === 102 ? 'verbunden' : s.io === 202 ? 'Anmeldung fehlgeschlagen' : s.io === 201 ? 'keine Verbindung' : 'Status ' + s.io) + '</span></div>'
-    + '<button class="btn2" data-act="Login">Neu anmelden</button></div>';
+    + '<button class="btn acc" data-act="Login">Neu anmelden</button></div>';
   if (s.canReboot) h += sysRow('reboot', 'NAS neu starten', 'Startet DSM neu (einige Minuten).', 'IP-Symcon und alle Dienste der NAS sind einige Minuten weg.', 'Neustart');
   if (s.canShutdown && !(u && u.level > 0)) h += sysRow('shutdown', 'NAS herunterfahren', 'Für Stromausfall mit leerer USV.', SHUT_WARN, 'Herunterfahren');
   h += '</div>';
